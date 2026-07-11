@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natura Siberica — сила сибирской природы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     NATURA SIBERICA — переменные бренда
+     Меняйте цвета/шрифты здесь — обновится весь сайт
+     ========================================================= */
+  :root{
+    --cream:      #F6F3E7;   /* фон страницы */
+    --sand:       #DCD9BB;   /* бежевый (бренд) */
+    --mist:       #DADED8;   /* светло-полынный (бренд) */
+    --sage:       #768064;   /* шалфей (бренд) */
+    --olive:      #434729;   /* тёмный олив (бренд) */
+    --olive-deep: #2B2E1C;   /* глубокий олив для контраста */
+    --ivory:      #FBFAF4;   /* карточки/светлые панели */
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body:    'Bricolage Grotesque', system-ui, sans-serif;
+
+    --radius: 22px;
+    --container: 1240px;
+    --edge: clamp(20px, 5vw, 64px);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--olive-deep);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{max-width:100%; display:block;}
+  a{color:inherit;}
+  h1,h2,h3{font-family:var(--font-display); margin:0; font-weight:500; letter-spacing:-0.01em;}
+  p{margin:0; line-height:1.6;}
+  .container{max-width:var(--container); margin:0 auto; padding:0 var(--edge);}
+  .eyebrow{
+    font-family:var(--font-body);
+    text-transform:uppercase;
+    font-size:12.5px;
+    letter-spacing:0.16em;
+    font-weight:600;
+    color:var(--sage);
+  }
+  section{position:relative;}
+  ::selection{background:var(--sage); color:var(--ivory);}
+
+  /* ---------- editable outline ---------- */
+  body.edit-mode [contenteditable="true"]{
+    outline:1.5px dashed rgba(67,71,41,0.35);
+    outline-offset:4px;
+    border-radius:4px;
+    cursor:text;
+  }
+  body.edit-mode [contenteditable="true"]:hover{
+    outline-color:var(--sage);
+    background:rgba(118,128,100,0.06);
+  }
+  body.edit-mode [contenteditable="true"]:focus{
+    outline:1.5px solid var(--sage);
+    background:rgba(118,128,100,0.09);
+  }
+  body.edit-mode .swap-image{cursor:pointer; position:relative;}
+  body.edit-mode .swap-image::after{
+    content:"⤾ Заменить фото";
+    position:absolute; inset:auto 0 0 0;
+    background:rgba(43,46,28,0.82); color:var(--ivory);
+    font-family:var(--font-body); font-size:12.5px; font-weight:600;
+    text-align:center; padding:9px 6px;
+    opacity:0; transition:opacity .18s ease;
+  }
+  body.edit-mode .swap-image:hover::after{opacity:1;}
+
+  /* ---------- toolbar ---------- */
+  #toolbar{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+    z-index:999;
+    display:flex; gap:8px;
+    background:var(--olive-deep);
+    padding:8px; border-radius:999px;
+    box-shadow:0 12px 32px rgba(0,0,0,0.28);
+    font-family:var(--font-body);
+  }
+  #toolbar button{
+    border:none; cursor:pointer; font-family:var(--font-body);
+    font-size:13.5px; font-weight:600;
+    padding:11px 18px; border-radius:999px;
+    background:transparent; color:var(--mist);
+    display:flex; align-items:center; gap:7px;
+    transition:background .15s ease, color .15s ease;
+    white-space:nowrap;
+  }
+  #toolbar button:hover{background:rgba(255,255,255,0.08); color:var(--ivory);}
+  #toolbar button.active{background:var(--sage); color:var(--ivory);}
+  #toolbar .hint{
+    color:rgba(250,250,244,0.55); font-size:12px; padding:11px 4px 11px 10px;
+    display:none;
+  }
+  body.edit-mode #toolbar .hint{display:flex; align-items:center;}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:100;
+    padding:18px var(--edge);
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(246,243,231,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(67,71,41,0.08);
+  }
+  .logo-mark{display:flex; align-items:center; gap:10px; text-decoration:none;}
+  .logo-mark svg{height:44px; width:auto;}
+  nav.main-nav{display:flex; gap:34px; align-items:center;}
+  nav.main-nav a{
+    text-decoration:none; font-size:14.5px; font-weight:500;
+    color:var(--olive-deep); position:relative; padding:4px 0;
+  }
+  nav.main-nav a::after{
+    content:""; position:absolute; left:0; right:100%; bottom:0; height:1.5px;
+    background:var(--sage); transition:right .22s ease;
+  }
+  nav.main-nav a:hover::after{right:0;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-body); font-weight:600; font-size:14px;
+    padding:13px 26px; border-radius:999px; text-decoration:none;
+    border:1.5px solid transparent; cursor:pointer;
+    transition:transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-solid{background:var(--olive-deep); color:var(--ivory);}
+  .btn-solid:hover{background:var(--sage);}
+  .btn-outline{background:transparent; color:var(--olive-deep); border-color:var(--olive-deep);}
+  .btn-outline:hover{border-color:var(--sage); color:var(--sage);}
+  .header-cta{display:flex; align-items:center; gap:14px;}
+  .burger{display:none;}
+
+  /* ---------- signature botanical motif ---------- */
+  .umbel{position:absolute; opacity:0.5; pointer-events:none;}
+  .umbel svg{width:100%; height:100%; display:block;}
+  .umbel path,.umbel circle{stroke:var(--olive); fill:none;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:64px var(--edge) 0;
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:40px; align-items:center;
+    max-width:var(--container); margin:0 auto;
+  }
+  .hero-copy{position:relative; z-index:2;}
+  .hero-copy .eyebrow{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+  .hero-copy .eyebrow::before{content:""; width:26px; height:1px; background:var(--sage);}
+  .hero h1{
+    font-size:clamp(38px, 5vw, 64px); line-height:1.04; color:var(--olive-deep);
+  }
+  .hero h1 em{font-style:italic; color:var(--sage);}
+  .hero p.lede{
+    margin-top:26px; max-width:460px; font-size:17px; color:rgba(43,46,28,0.72);
+  }
+  .hero-actions{display:flex; gap:14px; margin-top:38px; flex-wrap:wrap;}
+  .hero-stats{display:flex; gap:34px; margin-top:56px;}
+  .hero-stats div{border-left:1.5px solid rgba(67,71,41,0.18); padding-left:16px;}
+  .hero-stats b{font-family:var(--font-display); font-size:26px; font-weight:500; display:block;}
+  .hero-stats span{font-size:13px; color:rgba(43,46,28,0.6);}
+
+  .hero-visual{position:relative;}
+  .hero-visual .frame{
+    position:relative; border-radius:var(--radius); overflow:hidden;
+    background:var(--sand); aspect-ratio:4/5;
+  }
+  .hero-visual .frame img{
+    width:100%; height:100%; object-fit:cover;
+    transform:scale(1.0);
+  }
+  .hero-visual .floating-card{
+    position:absolute; left:-28px; bottom:-28px;
+    background:var(--ivory); border-radius:16px; padding:16px 20px;
+    box-shadow:0 20px 44px rgba(43,46,28,0.16);
+    display:flex; align-items:center; gap:12px; max-width:230px;
+  }
+  .hero-visual .floating-card .dot{
+    width:38px; height:38px; border-radius:50%; background:var(--sage); flex:none;
+    display:flex; align-items:center; justify-content:center; color:var(--ivory); font-size:16px;
+  }
+  .hero-visual .floating-card b{display:block; font-size:13.5px; font-family:var(--font-body); font-weight:700;}
+  .hero-visual .floating-card span{font-size:12px; color:rgba(43,46,28,0.6);}
+
+  /* ---------- marquee ---------- */
+  .marquee-wrap{
+    margin-top:78px; background:var(--olive-deep); color:var(--mist);
+    padding:18px 0; overflow:hidden; white-space:nowrap;
+  }
+  .marquee{display:inline-flex; animation:scroll 26s linear infinite;}
+  .marquee span{
+    font-family:var(--font-body); font-weight:600; font-size:14px;
+    letter-spacing:0.04em; padding:0 34px; display:inline-flex; align-items:center; gap:34px;
+    text-transform:uppercase;
+  }
+  .marquee span::after{content:"✻"; color:var(--sage); font-size:12px;}
+  @keyframes scroll{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+  @media (prefers-reduced-motion: reduce){.marquee{animation:none;}}
+
+  /* ---------- about ---------- */
+  .about{
+    padding:120px var(--edge) 100px; max-width:var(--container); margin:0 auto;
+    display:grid; grid-template-columns:0.86fr 1.14fr; gap:70px; align-items:center;
+  }
+  .about-visual{position:relative;}
+  .about-visual img{border-radius:var(--radius); width:100%;}
+  .about-visual .ring{
+    position:absolute; width:132px; height:132px; border-radius:50%;
+    background:var(--sage); color:var(--ivory);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:var(--font-display); font-size:14.5px; line-height:1.25;
+    top:-30px; right:-30px; padding:14px; box-shadow:0 16px 34px rgba(43,46,28,0.2);
+  }
+  .about-copy h2{font-size:clamp(30px,3.4vw,44px); margin-bottom:24px;}
+  .about-copy p.body-text{font-size:16.5px; color:rgba(43,46,28,0.74); max-width:520px;}
+  .about-copy p.body-text + p.body-text{margin-top:16px;}
+  .fact-row{display:flex; gap:30px; margin-top:40px; flex-wrap:wrap;}
+  .fact{
+    flex:1; min-width:150px; background:var(--ivory); border-radius:16px;
+    padding:20px 22px; border:1px solid rgba(67,71,41,0.08);
+  }
+  .fact b{display:block; font-family:var(--font-display); font-size:24px; margin-bottom:4px;}
+  .fact span{font-size:13px; color:rgba(43,46,28,0.62);}
+
+  /* ---------- section heading shared ---------- */
+  .section-head{
+    max-width:var(--container); margin:0 auto; padding:0 var(--edge);
+    display:flex; justify-content:space-between; align-items:flex-end; gap:30px;
+    margin-bottom:46px; flex-wrap:wrap;
+  }
+  .section-head h2{font-size:clamp(30px,3.6vw,46px);}
+  .section-head .eyebrow{margin-bottom:14px; display:block;}
+  .section-head p{max-width:380px; color:rgba(43,46,28,0.66); font-size:15.5px;}
+
+  /* ---------- catalog ---------- */
+  .catalog{padding:60px 0 110px; background:var(--sand);}
+  .catalog-grid{
+    max-width:var(--container); margin:0 auto; padding:0 var(--edge);
+    display:grid; grid-template-columns:repeat(3,1fr); gap:26px;
+  }
+  .product-card{
+    background:var(--ivory); border-radius:20px; overflow:hidden;
+    display:flex; flex-direction:column;
+    transition:transform .25s ease, box-shadow .25s ease;
+    opacity:0; transform:translateY(24px);
+  }
+  .product-card.in-view{opacity:1; transform:translateY(0);}
+  .product-card:hover{transform:translateY(-6px); box-shadow:0 26px 50px rgba(43,46,28,0.16);}
+  .product-media{aspect-ratio:1/1; background:var(--mist); overflow:hidden;}
+  .product-media img{width:100%; height:100%; object-fit:cover; transition:transform .5s ease;}
+  .product-card:hover .product-media img{transform:scale(1.06);}
+  .product-body{padding:22px 22px 24px; display:flex; flex-direction:column; gap:10px; flex:1;}
+  .product-tag{font-size:11.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--sage); font-weight:700;}
+  .product-body h3{font-size:19px; font-weight:500;}
+  .product-body p{font-size:13.8px; color:rgba(43,46,28,0.68);}
+  .product-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:12px;}
+  .price{font-family:var(--font-display); font-size:19px;}
+  .add-btn{
+    width:40px; height:40px; border-radius:50%; border:1.5px solid var(--olive-deep);
+    background:transparent; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:18px; transition:background .18s ease, color .18s ease;
+  }
+  .add-btn:hover{background:var(--olive-deep); color:var(--ivory);}
+
+  /* ---------- philosophy ---------- */
+  .philosophy{padding:120px var(--edge); max-width:var(--container); margin:0 auto;}
+  .phil-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:30px; margin-top:50px;}
+  .phil-card{padding:6px;}
+  .phil-icon{
+    width:56px; height:56px; border-radius:14px; background:var(--olive-deep);
+    display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+  }
+  .phil-icon svg{width:26px; height:26px; stroke:var(--mist); fill:none;}
+  .phil-card h3{font-size:20px; margin-bottom:10px; font-weight:500;}
+  .phil-card p{font-size:14.5px; color:rgba(43,46,28,0.68);}
+
+  /* ---------- cta banner ---------- */
+  .cta-banner{
+    margin:0 var(--edge) 120px; border-radius:32px; overflow:hidden;
+    background:var(--olive-deep); color:var(--ivory); position:relative;
+    display:grid; grid-template-columns:1.2fr 0.8fr; align-items:center;
+  }
+  .cta-copy{padding:70px 60px; position:relative; z-index:2;}
+  .cta-copy .eyebrow{color:var(--sand);}
+  .cta-copy h2{color:var(--ivory); font-size:clamp(28px,3.2vw,40px); margin:16px 0 26px;}
+  .cta-copy p{color:rgba(251,250,244,0.72); max-width:420px; margin-bottom:30px; font-size:15.5px;}
+  .cta-banner .btn-solid{background:var(--sage);}
+  .cta-banner .btn-solid:hover{background:var(--sand); color:var(--olive-deep);}
+  .cta-visual{position:relative; height:100%; min-height:320px;}
+  .cta-visual img{width:100%; height:100%; object-fit:cover;}
+  .cta-visual::before{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg, var(--olive-deep) 0%, rgba(43,46,28,0) 32%);
+    z-index:1;
+  }
+
+  /* ---------- footer ---------- */
+  footer{background:var(--olive-deep); color:var(--mist); padding:70px var(--edge) 30px;}
+  .footer-top{
+    max-width:var(--container); margin:0 auto; display:grid;
+    grid-template-columns:1.4fr 0.8fr 0.8fr 1fr; gap:50px; padding-bottom:56px;
+    border-bottom:1px solid rgba(255,255,255,0.12);
+  }
+  footer .logo-mark span{color:var(--ivory);}
+  .footer-desc{margin-top:18px; max-width:280px; font-size:14px; color:rgba(218,222,216,0.7);}
+  .footer-col h4{font-family:var(--font-body); font-size:13px; text-transform:uppercase; letter-spacing:0.1em; color:var(--sand); margin-bottom:18px;}
+  .footer-col a{display:block; text-decoration:none; color:rgba(218,222,216,0.82); font-size:14.5px; margin-bottom:12px;}
+  .footer-col a:hover{color:var(--ivory);}
+  .footer-bottom{
+    max-width:var(--container); margin:0 auto; padding-top:26px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    font-size:13px; color:rgba(218,222,216,0.55);
+  }
+  .socials{display:flex; gap:12px;}
+  .socials a{
+    width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center; text-decoration:none; color:var(--mist);
+    font-size:14px;
+  }
+  .socials a:hover{background:var(--sage); border-color:var(--sage);}
+
+  [data-reveal]{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease;}
+  [data-reveal].in-view{opacity:1; transform:translateY(0);}
+
+  @media (max-width:980px){
+    nav.main-nav{display:none;}
+    .hero{grid-template-columns:1fr; padding-top:40px;}
+    .hero-visual{order:-1;}
+    .about{grid-template-columns:1fr; padding:80px var(--edge);}
+    .about-visual .ring{display:none;}
+    .catalog-grid{grid-template-columns:repeat(2,1fr);}
+    .phil-grid{grid-template-columns:1fr; gap:36px;}
+    .cta-banner{grid-template-columns:1fr;}
+    .cta-visual{min-height:220px;}
+    .footer-top{grid-template-columns:1fr 1fr; row-gap:36px;}
+  }
+  @media (max-width:560px){
+    .catalog-grid{grid-template-columns:1fr;}
+    .hero-stats{gap:20px; flex-wrap:wrap;}
+    .footer-top{grid-template-columns:1fr;}
+    #toolbar{left:12px; right:12px; transform:none; width:calc(100% - 24px); justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ ЛОГОТИП (переиспользуемый SVG-шаблон) ============ -->
+<template id="logo-template">
+  <svg viewBox="0 0 210 210" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="105" cy="78" rx="52" ry="62" fill="none" stroke="currentColor" stroke-width="2.2"/>
+    <path d="M105 24 C 103 33, 103 40, 105 46" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="105" cy="21" r="3.4" fill="currentColor"/>
+    <path d="M105 40 C 96 34, 88 34, 84 40 C 90 44, 98 44, 105 40 Z" fill="currentColor"/>
+    <path d="M105 40 C 114 34, 122 34, 126 40 C 120 44, 112 44, 105 40 Z" fill="currentColor"/>
+    <text x="105" y="98" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="52" fill="currentColor">NS</text>
+    <text x="72" y="118" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-size="10" letter-spacing="0.5" fill="currentColor">est.</text>
+    <text x="136" y="118" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-size="10" fill="currentColor">2008</text>
+    <text x="105" y="158" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="21" letter-spacing="3" fill="currentColor">NATURA</text>
+    <text x="105" y="184" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="21" letter-spacing="3" fill="currentColor">SIBERICA</text>
+  </svg>
+</template>
+
+<!-- ============ Сигнатурный узор — «зонтик» дудника (как тиснение на упаковке) ============ -->
+<template id="umbel-template">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1">
+    <g>
+      <circle cx="100" cy="100" r="2" fill="currentColor" stroke="none"/>
+      <g id="ns-branch"></g>
+    </g>
+  </svg>
+</template>
+
+<header>
+  <a href="#top" class="logo-mark" style="color:var(--olive-deep);">
+    <span class="logo-svg-slot" style="width:40px;height:40px;color:var(--olive-deep);"></span>
+  </a>
+  <nav class="main-nav">
+    <a href="#about">О бренде</a>
+    <a href="#catalog">Ассортимент</a>
+    <a href="#philosophy">Философия</a>
+    <a href="#contacts">Контакты</a>
+  </nav>
+  <div class="header-cta">
+    <a href="#catalog" class="btn btn-solid" contenteditable="true">В магазин</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="umbel" style="width:420px; height:420px; top:-60px; right:-120px; color:var(--sage); z-index:0;"></div>
+
+    <div class="hero-copy">
+      <span class="eyebrow" contenteditable="true">Natural cosmetics · est. 2008</span>
+      <h1 contenteditable="true">Сила сибирской<br><em>дикой природы</em><br>в каждой капле</h1>
+      <p class="lede" contenteditable="true">Органическая косметика на дикорастущих травах и ягодах Сибири и Алтая. Без компромиссов между эффективностью и природой.</p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-solid" contenteditable="true">Смотреть каталог</a>
+        <a href="#about" class="btn btn-outline" contenteditable="true">Узнать историю бренда</a>
+      </div>
+      <div class="hero-stats">
+        <div><b contenteditable="true">2008</b><span contenteditable="true">год основания</span></div>
+        <div><b contenteditable="true">100%</b><span contenteditable="true">натуральное сырьё</span></div>
+        <div><b contenteditable="true">40+</b><span contenteditable="true">стран поставки</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="frame">
+        <img class="swap-image" src="img/body-oil.jpg" alt="Natura Siberica Body Oil">
+      </div>
+      <div class="floating-card">
+        <div class="dot">✻</div>
+        <div>
+          <b contenteditable="true">Vegan &amp; Cruelty-free</b>
+          <span contenteditable="true">не тестируется на животных</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MARQUEE ================= -->
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <span contenteditable="true">Vegan</span>
+      <span contenteditable="true">Not tested on animals</span>
+      <span contenteditable="true">Wild harvested</span>
+      <span contenteditable="true">Active Organics</span>
+      <span contenteditable="true">Est. 2008</span>
+      <span contenteditable="true">Vegan</span>
+      <span contenteditable="true">Not tested on animals</span>
+      <span contenteditable="true">Wild harvested</span>
+      <span contenteditable="true">Active Organics</span>
+      <span contenteditable="true">Est. 2008</span>
+    </div>
+  </div>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="about" id="about" data-reveal>
+    <div class="about-visual">
+      <img class="swap-image" src="img/box-dark.jpg" alt="Natura Siberica упаковка">
+      <div class="ring" contenteditable="true">С 2008<br>года</div>
+    </div>
+    <div class="about-copy">
+      <span class="eyebrow" contenteditable="true">О бренде</span>
+      <h2 contenteditable="true">Косметика родом из сибирской тайги</h2>
+      <p class="body-text" contenteditable="true">Natura Siberica родилась из простой идеи: собирать растения там, где они растут по-настоящему дико — на Алтае, в Саянах, на Байкале — и сохранять их силу в формулах без лишней химии.</p>
+      <p class="body-text" contenteditable="true">Каждая линейка создаётся вместе с ботаниками и технологами, а упаковка бережно хранит текстуру и характер самого растения — вплоть до тиснёного узора дикого зонтичного цветка на коробке.</p>
+      <div class="fact-row">
+        <div class="fact"><b contenteditable="true">220+</b><span contenteditable="true">растений в базе рецептур</span></div>
+        <div class="fact"><b contenteditable="true">0</b><span contenteditable="true">силиконов и парабенов</span></div>
+        <div class="fact"><b contenteditable="true">18</b><span contenteditable="true">лет на рынке</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CATALOG ================= -->
+  <section class="catalog" id="catalog">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow" contenteditable="true">Ассортимент</span>
+        <h2 contenteditable="true">Бестселлеры линейки</h2>
+      </div>
+      <p contenteditable="true">Уход за лицом, телом и волосами на основе алтайской облепихи, бергамота и сибирских трав.</p>
+    </div>
+
+    <div class="catalog-grid">
+
+      <article class="product-card" data-reveal>
+        <div class="product-media"><img class="swap-image" src="img/tube-gelee.jpg" alt="Gelée Hydratante à la Bergamotte"></div>
+        <div class="product-body">
+          <span class="product-tag" contenteditable="true">Уход за телом</span>
+          <h3 contenteditable="true">Увлажняющий гель-желе с бергамотом</h3>
+          <p contenteditable="true">Лёгкая текстура, быстро впитывается, дарит коже свежий цитрусовый аромат.</p>
+          <div class="product-foot">
+            <span class="price" contenteditable="true">1 290 ₽</span>
+            <button class="add-btn" contenteditable="true">+</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-reveal>
+        <div class="product-media"><img class="swap-image" src="img/jar-vitc.jpg" alt="Vitamin C Total Renewal Pads"></div>
+        <div class="product-body">
+          <span class="product-tag" contenteditable="true">Уход за лицом</span>
+          <h3 contenteditable="true">Пилинг-диски Vitamin C</h3>
+          <p contenteditable="true">7 видов витамина C и AHA/PHA-кислоты для деликатного обновления кожи.</p>
+          <div class="product-foot">
+            <span class="price" contenteditable="true">2 190 ₽</span>
+            <button class="add-btn" contenteditable="true">+</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-reveal>
+        <div class="product-media"><img class="swap-image" src="img/shampoo.jpg" alt="Облепиховый шампунь-уход Curl Control"></div>
+        <div class="product-body">
+          <span class="product-tag" contenteditable="true">Уход за волосами</span>
+          <h3 contenteditable="true">Облепиховый шампунь Curl Control</h3>
+          <p contenteditable="true">Структурирует локоны, питает и увлажняет вьющиеся волосы по всей длине.</p>
+          <div class="product-foot">
+            <span class="price" contenteditable="true">990 ₽</span>
+            <button class="add-btn" contenteditable="true">+</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-reveal>
+        <div class="product-media"><img class="swap-image" src="img/micellar.jpg" alt="Biome Sensitive Micellar Water"></div>
+        <div class="product-body">
+          <span class="product-tag" contenteditable="true">Очищение</span>
+          <h3 contenteditable="true">Мицеллярная вода Biome Sensitive</h3>
+          <p contenteditable="true">Ниацинамид, полигликуроновая кислота и сквалан для всех типов кожи.</p>
+          <div class="product-foot">
+            <span class="price" contenteditable="true">1 490 ₽</span>
+            <button class="add-btn" contenteditable="true">+</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-reveal>
+        <div class="product-media"><img class="swap-image" src="img/enzyme-powder.jpg" alt="Biome Hydration Enzyme Powder"></div>
+        <div class="product-body">
+          <span class="product-tag" contenteditable="true">Уход за лицом</span>
+          <h3 contenteditable="true">Энзимная пудра для умывания Biome</h3>
+          <p contenteditable="true">Таливаника и 1% витамина C бережно очищают, не нарушая баланс кожи.</p>
+          <div class="product-foot">
+            <span class="price" contenteditable="true">1 690 ₽</span>
+            <button class="add-btn" contenteditable="true">+</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-reveal>
+        <div class="product-media"><img class="swap-image" src="img/body-oil.jpg" alt="Natura Siberica Body Oil"></div>
+        <div class="product-body">
+          <span class="product-tag" contenteditable="true">Уход за телом</span>
+          <h3 contenteditable="true">Масло для тела Almond &amp; Fragrance</h3>
+          <p contenteditable="true">Миндальное масло и витамин E возвращают коже мягкость и эластичность.</p>
+          <div class="product-foot">
+            <span class="price" contenteditable="true">1 890 ₽</span>
+            <button class="add-btn" contenteditable="true">+</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= PHILOSOPHY ================= -->
+  <section class="philosophy" id="philosophy" data-reveal>
+    <div class="section-head" style="padding:0; margin-bottom:0;">
+      <div>
+        <span class="eyebrow" contenteditable="true">Философия</span>
+        <h2 contenteditable="true">Три принципа, от которых мы не отступаем</h2>
+      </div>
+      <p contenteditable="true">То, что определяет каждую формулу — от первого до последнего ингредиента.</p>
+    </div>
+    <div class="phil-grid">
+      <div class="phil-card">
+        <div class="phil-icon"><svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 2v20M12 6c-3 0-6 2-6 6 3 0 6-1 6-4 0 3 3 4 6 4 0-4-3-6-6-6Z"/></svg></div>
+        <h3 contenteditable="true">Дикорастущее сырьё</h3>
+        <p contenteditable="true">Собираем травы и ягоды там, где они растут естественно — без плантаций и удобрений.</p>
+      </div>
+      <div class="phil-card">
+        <div class="phil-icon"><svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M4 4h16v6a8 8 0 1 1-16 0V4Z"/><path d="M9 20h6"/></svg></div>
+        <h3 contenteditable="true">Без компромиссов</h3>
+        <p contenteditable="true">Никаких силиконов, парабенов и минеральных масел — только то, что нужно коже.</p>
+      </div>
+      <div class="phil-card">
+        <div class="phil-icon"><svg viewBox="0 0 24 24" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3 contenteditable="true">Этичное производство</h3>
+        <p contenteditable="true">Vegan-формулы, отказ от тестирования на животных, переработанная упаковка.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA BANNER ================= -->
+  <section class="cta-banner" data-reveal>
+    <div class="cta-copy">
+      <span class="eyebrow" contenteditable="true">Подарочные наборы</span>
+      <h2 contenteditable="true">Соберите свой ритуал ухода</h2>
+      <p contenteditable="true">Составьте набор из бестселлеров бренда — с бесплатной упаковкой и открыткой для получателя.</p>
+      <a href="#catalog" class="btn btn-solid" contenteditable="true">Собрать набор</a>
+    </div>
+    <div class="cta-visual">
+      <img src="img/box-sage.jpg" alt="Подарочная упаковка Natura Siberica" class="swap-image">
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer id="contacts">
+  <div class="footer-top">
+    <div>
+      <a href="#top" class="logo-mark">
+        <span class="logo-svg-slot" style="width:38px;height:38px;color:var(--ivory);"></span>
+        <span style="font-family:var(--font-display); font-size:19px; letter-spacing:1px;" contenteditable="true">NATURA SIBERICA</span>
+      </a>
+      <p class="footer-desc" contenteditable="true">Органическая косметика из дикорастущих трав Сибири и Алтая. Основан в 2008 году.</p>
+      <div class="socials" style="margin-top:22px;">
+        <a href="#" contenteditable="true">in</a>
+        <a href="#" contenteditable="true">vk</a>
+        <a href="#" contenteditable="true">tg</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Каталог</h4>
+      <a href="#catalog" contenteditable="true">Уход за лицом</a>
+      <a href="#catalog" contenteditable="true">Уход за телом</a>
+      <a href="#catalog" contenteditable="true">Уход за волосами</a>
+    </div>
+    <div class="footer-col">
+      <h4>Бренд</h4>
+      <a href="#about" contenteditable="true">О нас</a>
+      <a href="#philosophy" contenteditable="true">Философия</a>
+      <a href="#" contenteditable="true">Вакансии</a>
+    </div>
+    <div class="footer-col">
+      <h4>Контакты</h4>
+      <a href="#" contenteditable="true">hello@naturasiberica.ru</a>
+      <a href="#" contenteditable="true">+7 (800) 000-00-00</a>
+      <a href="#" contenteditable="true">Москва, Россия</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span contenteditable="true">© 2026 Natura Siberica. Все права защищены.</span>
+    <span contenteditable="true">Дизайн — ваш собственный ✻</span>
+  </div>
+</footer>
+
+<!-- ================= TOOLBAR ================= -->
+<div id="toolbar">
+  <button id="edit-toggle">✎ Режим редактирования</button>
+  <button id="export-btn">⭳ Сохранить как HTML</button>
+  <span class="hint">Кликайте по тексту и фото</span>
+</div>
+
+<input type="file" id="image-input" accept="image/*" style="display:none;">
+
+<script>
+(function(){
+  // ---------- вставляем логотип и узор-«зонтик» из <template> ----------
+  const logoTpl = document.getElementById('logo-template').innerHTML;
+  document.querySelectorAll('.logo-svg-slot').forEach(slot=>{ slot.innerHTML = logoTpl; });
+
+  // signature umbel pattern, built procedurally (radial spokes ending in tiny florets)
+  function buildUmbel(spokes, radius){
+    let g = '';
+    for(let i=0;i<spokes;i++){
+      const a = (Math.PI*2/spokes)*i;
+      const x2 = 100 + Math.cos(a)*radius;
+      const y2 = 100 + Math.sin(a)*radius;
+      g += `<line x1="100" y1="100" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" />`;
+      g += `<circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="2.6" fill="currentColor" stroke="none"/>`;
+      // secondary tiny umbels at branch tips
+      for(let j=0;j<5;j++){
+        const a2 = a + (j-2)*0.22;
+        const r2 = radius*0.22;
+        const x3 = x2 + Math.cos(a2)*r2;
+        const y3 = y2 + Math.sin(a2)*r2;
+        g += `<line x1="${x2.toFixed(1)}" y1="${y2.toFixed(1)}" x2="${x3.toFixed(1)}" y2="${y3.toFixed(1)}" stroke-width="0.7"/>`;
+        g += `<circle cx="${x3.toFixed(1)}" cy="${y3.toFixed(1)}" r="1.4" fill="currentColor" stroke="none"/>`;
+      }
+    }
+    return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1">${g}</svg>`;
+  }
+  document.querySelectorAll('.umbel').forEach(el=>{
+    el.innerHTML = buildUmbel(16, 92);
+  });
+
+  // ---------- scroll reveal ----------
+  const revealEls = document.querySelectorAll('[data-reveal], .product-card');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); } });
+  }, {threshold:0.14});
+  revealEls.forEach(el=>io.observe(el));
+
+  // ---------- edit mode ----------
+  const body = document.body;
+  const editBtn = document.getElementById('edit-toggle');
+  editBtn.addEventListener('click', ()=>{
+    body.classList.toggle('edit-mode');
+    editBtn.classList.toggle('active');
+  });
+
+  // ---------- image swap ----------
+  const fileInput = document.getElementById('image-input');
+  let activeImg = null;
+  document.querySelectorAll('.swap-image').forEach(img=>{
+    img.addEventListener('click', ()=>{
+      if(!body.classList.contains('edit-mode')) return;
+      activeImg = img;
+      fileInput.click();
+    });
+  });
+  fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file || !activeImg) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{ activeImg.src = ev.target.result; };
+    reader.readAsDataURL(file);
+  });
+
+  // ---------- export edited page as standalone html ----------
+  document.getElementById('export-btn').addEventListener('click', ()=>{
+    const clone = document.documentElement.cloneNode(true);
+    clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+    clone.querySelector('#toolbar')?.remove();
+    clone.querySelector('#image-input')?.remove();
+    clone.classList.remove('edit-mode');
+    const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'natura-siberica-site.html';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
+
+</body>
+</html>
